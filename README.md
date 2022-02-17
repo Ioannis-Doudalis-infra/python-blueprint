@@ -1,39 +1,89 @@
 # python-blueprint
 
-[![GitHub Actions][github-actions-badge]](https://github.com/johnthagen/python-blueprint/actions)
-[![Code style: black][black-badge]](https://github.com/psf/black)
-[![Imports: isort][isort-badge]](https://pycqa.github.io/isort/)
+- [python-blueprint](#python-blueprint)
+  - [Setup](#setup)
+  - [Quick Guide](#quick-guide)
+  - [Top Level Automation](#top-level-automation)
+  - [Python Package Dependencies](#python-package-dependencies)
+  - [Virtual Environments](#virtual-environments)
+  - [(Applications Only) Locking Dependencies](#applications-only-locking-dependencies)
+  - [Syncing Virtual Environments](#syncing-virtual-environments)
+- [Packaging](#packaging)
+  - [Upload Distributions to PyPI](#upload-distributions-to-pypi)
+- [Testing](#testing)
+  - [Unit Testing](#unit-testing)
+  - [Code Style Checking](#code-style-checking)
+  - [Automated Code Formatting](#automated-code-formatting)
+  - [Continuous Integration](#continuous-integration)
+- [Type Hinting](#type-hinting)
+  - [Distributing Type Hints](#distributing-type-hints)
+- [Documentation](#documentation)
+  - [Generating a User Guide](#generating-a-user-guide)
+  - [Generating API Documentation](#generating-api-documentation)
+- [Project Structure](#project-structure)
+- [Licensing](#licensing)
+- [Docker](#docker)
 
-[github-actions-badge]: https://github.com/johnthagen/python-blueprint/workflows/python/badge.svg
-[black-badge]: https://img.shields.io/badge/code%20style-black-000000.svg
-[isort-badge]: https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336
 
-Example Python project that demonstrates how to create a tested Python package using the latest
-Python testing and linting tooling. The project contains a `fact` package that provides a simple
-implementation of the [factorial algorithm](https://en.wikipedia.org/wiki/Factorial) (`fact.lib`)
-and a command line interface (`fact.cli`).
+This repo serves as an example Python repo that we can copy and use as a template/skeleton for creating a new Python project.
 
-# Requirements
+The infrastructure is taken from the **https://github.com/johnthagen/python-blueprint** repo (the README has been adjusted) and we want to be able to:
 
-Python 3.8+.
+- Auto-format the code
+- Have Lint checks
+- Build documentation
+- Have basic CI using GitHub Actions
+- Run tests and create test reports
+- Create artifacts
+- Upload artifacts to either GitHub or our internal Artifactory
 
-> **Note**
->
-> Because [Python 2.7 support ended January 1, 2020](https://pythonclock.org/), new projects 
-> should consider supporting Python 3 only, which is simpler than trying to support both. As a 
-> result, support for Python 2.7 in this example project has been dropped.
+## Setup
 
-# Windows Support
+Make sure that you have the following dependencies on Ubuntu
 
-Summary: On Windows, use `py` instead of `python3` for many of the examples in this documentation.
+```bash
+sudo apt-get install tox python3
+```
 
-This package fully supports Windows, along with Linux and macOS, but Python is
-typically [installed differently on Windows](https://docs.python.org/3/using/windows.html). Windows
-users typically access Python through the [py](https://www.python.org/dev/peps/pep-0397/) launcher
-rather than a `python3` link in their `PATH`. Within a virtual environment, all platforms operate
-the same and use a `python` link to access the Python version used in that virtual environment.
+## Quick Guide
 
-# Dependencies
+List of commands
+
+```bash
+$ tox -a
+fmt-check
+lint
+type-check
+py38
+py39
+py310
+docs
+fmt
+docs-serve
+docs-github-pages
+build
+licenses
+```
+
+To run one of the commands you can do :
+
+```bash
+tox -e link
+```
+
+## Top Level Automation
+
+The top-level automation is written in [tox](https://tox.wiki/en/latest/)
+
+See file [``tox.ini``](/tox.ini) for the top-level automation and use
+
+```bash
+tox -l
+```
+
+To see the list of available tox commands.
+
+## Python Package Dependencies
 
 Dependencies are defined in:
 
@@ -55,13 +105,6 @@ On *Nix:
 # On Python 3.9+, add --upgrade-deps
 $ python3 -m venv venv
 $ source venv/bin/activate
-```
-
-On Windows Powershell / `cmd`:
-
-```bash
-> py -m venv venv
-> venv\Scripts\activate
 ```
 
 Once activated, it is a good practice to update core packaging tools (`pip`, `setuptools`,
@@ -111,7 +154,7 @@ Packaging is configured by:
 - `setup.py`
 - `MANIFEST.in`
 
-To package the project as both a 
+To package the project as both a
 [source distribution](https://docs.python.org/3/distutils/sourcedist.html) and
 a [wheel](https://wheel.readthedocs.io/en/stable/) using the
 [`build`](https://pypa-build.readthedocs.io/en/stable/) package:
@@ -126,6 +169,8 @@ Read more about the [advantages of wheels](https://pythonwheels.com/) to underst
 wheel distributions are important.
 
 ## Upload Distributions to PyPI
+
+***DISABLED: WE DO NOT SUPPORT PYPI UPLOADS, FOR REFERENCE ONLY***
 
 Source and wheel redistributable packages can
 be [uploaded to PyPI](https://packaging.python.org/tutorials/packaging-projects/) or installed
@@ -331,7 +376,7 @@ distribution has been packaged and installed, thereby catching any errors in pac
 installation scripts, which are common. Having the Python packages in the project root subverts
 this isolation for two reasons:
 
-1. Calling `python` in the project root (for example, `python -m pytest tests/`) 
+1. Calling `python` in the project root (for example, `python -m pytest tests/`)
    [causes Python to add the current working directory](https://docs.pytest.org/en/latest/pythonpath.html#invoking-pytest-versus-python-m-pytest) (
    the project root) to `sys.path`, which Python uses to find modules. Because the source
    package `fact` is in the project root, it shadows the `fact` package installed in the tox
@@ -350,7 +395,7 @@ prevent this, there are three possible solutions:
    to `tests`.
 3. Move the source packages to a dedicated `src` folder.
 
-The dedicated `src` directory is the 
+The dedicated `src` directory is the
 [recommended solution](https://docs.pytest.org/en/latest/pythonpath.html#test-modules-conftest-py-files-inside-packages)
 by `pytest` when using tox and the solution this blueprint promotes because it is the least brittle
 even though it deviates from the traditional Python project structure. It results is a directory
@@ -416,48 +461,3 @@ To run the image in a container:
 # Example calculating the factorial of 5.
 $ docker run --rm --interactive --tty fact 5
 ```
-
-# PyCharm Configuration
-
-To configure PyCharm 2018.3 and newer to align to the code style used in this project:
-
-- Settings | Search "Hard wrap at" (Note, this will be automatically set by `.editorconfig`)
-  - Editor | Code Style | General | Hard wrap at: 99
-
-- Settings | Search "Optimize Imports"
-  - Editor | Code Style | Python | Imports
-      - ☑ Sort import statements
-        - ☑ Sort imported names in "from" imports
-        - ☐ Sort plain and "from" imports separately within a group
-        - ☐ Sort case-insensitively
-      - Structure of "from" imports
-        - ◎ Leave as is
-        - ◉ Join imports with the same source
-        - ◎ Always split imports
-
-- Settings | Search "Docstrings"
-  - Tools | Python Integrated Tools | Docstrings | Docstring Format: Google
-
-- Settings | Search "pytest"
-  - Tools | Python Integrated Tools | Testing | Default test runner: pytest
-
-- Settings | Search "Force parentheses"
-  - Editor | Code Style | Python | Wrapping and Braces | "From" Import Statements
-    - ☑ Force parentheses if multiline
-
-## Integrate Code Formatters
-
-To integrate automatic code formatters into PyCharm, reference the following instructions:
-
-- [black integration](https://black.readthedocs.io/en/stable/integrations/editors.html#pycharm-intellij-idea)
-  - The File Watchers method (step 6) is recommended. This will run `black` on every save.
-
-- [isort integration](https://github.com/timothycrosley/isort/wiki/isort-Plugins)
-    - The File Watchers method (option 1) is recommended. This will run `isort` on every save.
-
-> **Tip**
->
-> These tools work best if you properly mark directories as excluded from the project that should 
-> be, such as `.tox`. See 
-> <https://www.jetbrains.com/help/pycharm/project-tool-window.html#content_pane_context_menu> on 
-> how to Right Click | Mark Directory as | Excluded.
